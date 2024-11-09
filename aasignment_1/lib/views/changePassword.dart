@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:aasignment_1/views/forgetPassword_screen.dart';
+import 'package:aasignment_1/views/login_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:aasignment_1/myconfig.dart';
 import 'package:flutter/material.dart';
@@ -195,15 +196,49 @@ class _ChangePasswordState extends State<ChangePassword> {
       );
       return;
     }
+    onUpdatePasswordDialog();
 
-    UpdatePassword();
+    //UpdatePassword();
    
-    // Add logic for successful password update (e.g., API call)
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   const SnackBar(
-    //     content: Text("Password updated successfully."),
-    //   ),
-    // );
+    
+  }
+
+  void onUpdatePasswordDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          title: const Text(
+            "Update New Password?",
+            style: TextStyle(),
+          ),
+          content: const Text("Are you sure?", style: TextStyle()),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                "Yes",
+                style: TextStyle(),
+              ),
+              onPressed: () {
+                UpdatePassword();
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text(
+                "No",
+                style: TextStyle(),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void UpdatePassword() {
@@ -212,7 +247,7 @@ class _ChangePasswordState extends State<ChangePassword> {
   http.post(
     Uri.parse("${Myconfig.servername}/memberlink_asg1/api/update_password.php"),
     body: {
-      "email": widget.email, // Use the email here
+      "email": widget.email, 
       "password": newPassword,
     },
   ).then((response) {
@@ -225,6 +260,8 @@ class _ChangePasswordState extends State<ChangePassword> {
           content: Text("Password Updated Successfully"),
           backgroundColor: Colors.green,
         ));
+        Navigator.push(context,
+              MaterialPageRoute(builder: (content) => const LoginScreen()));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Update Password Failed"),
