@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 
 class VerifyOTP extends StatefulWidget {
-  const VerifyOTP({super.key});
+  final String email;
+  const VerifyOTP({super.key, required this.email});
 
   @override
   State<VerifyOTP> createState() => _VerifyOTPState();
@@ -128,7 +129,7 @@ class _VerifyOTPState extends State<VerifyOTP> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        const ChangePassword()));
+                                        ChangePassword(email: widget.email)));
                           }else{
                             ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text("Verify OTP Unsuccess"),backgroundColor: Colors.red,));
