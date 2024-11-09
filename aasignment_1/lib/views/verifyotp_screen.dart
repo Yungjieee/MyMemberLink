@@ -33,7 +33,7 @@ class _VerifyOTPState extends State<VerifyOTP> {
             ),
             const SizedBox(width: 8), // Adds spacing between logo and text
             const Text(
-              'Forget Password',
+              'Verify Email',
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 20), // Sets text color to white
@@ -50,7 +50,7 @@ class _VerifyOTPState extends State<VerifyOTP> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Image(
-                  image: AssetImage('assets/images/verify_email.png'),
+                  image: AssetImage('assets/images/verify_code.png'),
                 ),
                 const Text(
                   'Verify Your Email',

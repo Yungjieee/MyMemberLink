@@ -45,7 +45,7 @@ class _ForgetpasswordScreenState extends State<ForgetpasswordScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Image(
-                  image: AssetImage('assets/images/fuck.png'),
+                  image: AssetImage('assets/images/forgot_password.png'),
                 ),
                 const Text(
                   'Forgot Password?',
