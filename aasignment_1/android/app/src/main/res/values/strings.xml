@@ -1,0 +1,8 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<resources>
+<string name="app_name">MyMemberLink</string>
+<string name="facebook_app_id">862749516065061</string>
+<string name="fb_login_protocol_scheme">fb862749516065061</string>
+<string name="facebook_client_token">cb287416fb4b125e3b71beb3d9e49742</string>
+</resources>
+
