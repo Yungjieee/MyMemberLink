@@ -19,11 +19,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController phoneNumcontroller = TextEditingController();
   bool isVisible1 = false;
   bool isVisible2 = false;
-  // Regex for basic email validation
-  final RegExp emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-  // Password regex pattern for validation
-  final RegExp passwordRegex =
-      RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
 
   @override
   Widget build(BuildContext context) {
@@ -350,7 +345,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           children: [
                             IconButton(
                               onPressed: () {
-                                // Add your functionality here for Facebook button press
+                                // SignInWithFacebook();
                               },
                               icon: Container(
                                 padding: const EdgeInsets.all(5),
@@ -433,7 +428,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void onRegisterDialog() {
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -508,7 +502,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
-
   bool validateFields() {
     String email = emailcontroller.text.trim();
     String password = passwordcontroller.text.trim();
@@ -528,6 +521,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     // Email validation
+    // Regex for basic email validation
+    final RegExp emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please enter a valid email address")),
@@ -536,11 +531,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     // Password validation
+    // Password regex pattern for validation
+    final RegExp passwordRegex =
+        RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
     if (!passwordRegex.hasMatch(password)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(
-                "Invalid Password Format")),
+        const SnackBar(content: Text("Invalid Password Format")),
       );
       return false;
     }
