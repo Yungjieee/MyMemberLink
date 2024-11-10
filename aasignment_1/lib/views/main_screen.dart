@@ -10,29 +10,69 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-final GoogleSignIn googleSignIn = GoogleSignIn();
+  final GoogleSignIn googleSignIn = GoogleSignIn();
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text("Main Screen"),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: () {
-            signOutwithGoogle(context);
-          },
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Main Screen"),
+        automaticallyImplyLeading: false, // Prevents the default back button
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              Scaffold.of(context).openDrawer(); // Opens the drawer when tapped
+            },
+          ),
         ),
-      ],
-    ),
-    body: const Center(
-      child: Text("MAIN SCREEN"),
-    ),
-  );
-}
-
-  
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              signOutwithGoogle(context);
+            },
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Home'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+      body: const Center(
+        child: Text("MAIN SCREEN"),
+      ),
+    );
+  }
 
   Future signOutwithGoogle(BuildContext context) async{
     
@@ -43,3 +83,13 @@ Widget build(BuildContext context) {
 
   }
 }
+
+
+  // Future signOutwithGoogle(BuildContext context) async{
+    
+  //   await googleSignIn.signOut();
+  //   Navigator.pop(context);
+  //    Navigator.push(context,
+  //             MaterialPageRoute(builder: (content) => const LoginScreen()));
+
+  // }

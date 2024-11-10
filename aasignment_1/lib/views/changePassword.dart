@@ -162,44 +162,22 @@ class _ChangePasswordState extends State<ChangePassword> {
 
     // Password validation regex
     final passwordRegex = RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$');
-
     if (!passwordRegex.hasMatch(newPassword)) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Invalid Password"),
-          content: const Text("Password must be at least 8 characters long, contain a number, an uppercase letter, a lowercase letter, and a special symbol."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Invalid password format"),
+          backgroundColor: Colors.red,
+        ));
       return;
     }
 
     if (newPassword != confirmPassword) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Passwords Do Not Match"),
-          content: const Text("The new password and confirmation password do not match."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
+       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("The new password and confirmation password do not match."),
+          backgroundColor: Colors.red,
+        ));
       return;
     }
     onUpdatePasswordDialog();
-
-    //UpdatePassword();
-   
     
   }
 

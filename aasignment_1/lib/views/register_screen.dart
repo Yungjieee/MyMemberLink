@@ -541,6 +541,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return false;
     }
 
+    // phone number validation
+    final RegExp phoneNumRegex = RegExp(r'^\d{9,10}$');
+    if (!phoneNumRegex.hasMatch(phoneNum)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid 9-10 digit phone number")),
+      );
+      return false;
+    }
+
+
     // Confirm Password validation
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
