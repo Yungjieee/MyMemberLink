@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:aasignment_1/views/forgetPassword_screen.dart';
-import 'package:aasignment_1/views/login_screen.dart';
+import 'package:aasignment_1/views/auth/forgetPassword_screen.dart';
+import 'package:aasignment_1/views/auth/login_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:aasignment_1/myconfig.dart';
 import 'package:flutter/material.dart';

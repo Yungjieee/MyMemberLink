@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:aasignment_1/myconfig.dart';
-import 'package:aasignment_1/views/login_screen.dart';
+import 'package:aasignment_1/views/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -62,6 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   height: 10,
                 ),
                 Card(
+                  color: Colors.white,
                   elevation: 30,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),

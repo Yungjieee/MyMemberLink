@@ -1,4 +1,4 @@
-import 'package:aasignment_1/views/changePassword.dart';
+import 'package:aasignment_1/views/auth/changePassword.dart';
 import 'package:email_otp/email_otp.dart';
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';

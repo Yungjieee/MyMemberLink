@@ -1,14 +1,12 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:aasignment_1/myconfig.dart';
-import 'package:aasignment_1/views/forgetPassword_screen.dart';
-import 'package:aasignment_1/views/main_screen.dart';
-import 'package:aasignment_1/views/verifyOTP_screen.dart';
-//import 'package:aasignment_1/views/verifyOTP_screen.dart';
+import 'package:aasignment_1/views/auth/forgetPassword_screen.dart';
+import 'package:aasignment_1/views/newsletter/main_screen.dart';
+import 'package:aasignment_1/views/auth/verifyOTP_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:aasignment_1/views/register_screen.dart';
+import 'package:aasignment_1/views/auth/register_screen.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -93,6 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 10,
                 ),
                 Card(
+                  color: Colors.white,
                   elevation: 30,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
