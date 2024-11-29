@@ -5,7 +5,8 @@ import 'package:aasignment_1/views/newsletter/main_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class MyDrawer extends StatefulWidget {
-  const MyDrawer({super.key});
+  final String email;
+  const MyDrawer( {super.key, required this.email});
 
   @override
   State<MyDrawer> createState() => _MyDrawerState();
@@ -30,7 +31,7 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               // Define onTap actions here if needed
                Navigator.push(context,
-                MaterialPageRoute(builder: (content) => const MainScreen()));
+                MaterialPageRoute(builder: (content) => MainScreen(email: widget.email,)));
             },
             title: const Text("Newsletter"),
           ),

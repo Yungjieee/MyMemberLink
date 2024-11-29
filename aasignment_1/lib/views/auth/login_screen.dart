@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => MainScreen(),
+            builder: (context) => MainScreen(email: emailcontroller.text,),
           ),
         );
       }
@@ -464,7 +464,7 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.green,
           ));
           Navigator.push(context,
-              MaterialPageRoute(builder: (content) => const MainScreen()));
+              MaterialPageRoute(builder: (content) => MainScreen(email: emailcontroller.text)));
         } else if (data['status'] == "wrong_password") {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("Password is incorrect"),

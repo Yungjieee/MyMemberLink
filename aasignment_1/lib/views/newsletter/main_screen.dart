@@ -10,7 +10,8 @@ import 'package:aasignment_1/views/newsletter/edit_news.dart';
 import 'package:http/http.dart' as http;
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final String email;
+  const MainScreen({super.key, required this.email});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -26,6 +27,7 @@ class _MainScreenState extends State<MainScreen> {
   late double screenwidth, screenHeight;
   var color;
   TextEditingController searchController = TextEditingController();
+  bool isFavorite = false;
 
   @override
   void initState() {
@@ -34,7 +36,6 @@ class _MainScreenState extends State<MainScreen> {
     loadNewsData();
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     screenwidth = MediaQuery.of(context).size.width;
@@ -99,25 +100,7 @@ class _MainScreenState extends State<MainScreen> {
                       itemBuilder: (context, index) {
                         if (index == newsList.length) {
                           // Display "Page: X / Result: Y" at the end of the list
-                          return Column(
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                margin: const EdgeInsets.only(top: 10.0),
-                                child: Text(
-                                  "Page: $curpage / Result: $numofresult",
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    // color: Colors.orange,
-                                    // fontWeight: FontWeight.bold
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: screenHeight * 0.02,
-                              )
-                            ],
-                          );
+                          return buildPaginationInfo();
                         }
                         // Normal news cards
                         return Padding(
@@ -127,8 +110,11 @@ class _MainScreenState extends State<MainScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: ListTile(
+                                onTap: () {
+                                  showNewsDetailsDialog(index);
+                                },
                                 onLongPress: () {
-                                  deleteDialog(index);
+                                  showEditDeleteMenu(index);
                                 },
                                 title: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,9 +154,21 @@ class _MainScreenState extends State<MainScreen> {
                                     style: const TextStyle(fontSize: 12)),
                                 trailing: IconButton(
                                   onPressed: () {
-                                    showNewsDetailsDialog(index);
+                                    // showNewsDetailsDialog(index);
+                                    // Toggle favorite status
+                                    //toggleFavorite(newsList[index]);
+                                    setState(() {
+                                      isFavorite =
+                                          !isFavorite; // Toggle favorite state
+                                    });
                                   },
-                                  icon: const Icon(Icons.arrow_forward_ios),
+                                  icon: Icon(
+                                    isFavorite
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color:
+                                        isFavorite ? Colors.red : Colors.grey,
+                                  ),
                                 ),
                               ),
                             ),
@@ -179,39 +177,11 @@ class _MainScreenState extends State<MainScreen> {
                       },
                     ),
                   ),
-                  SizedBox(
-                    height: screenHeight * 0.05,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: numofpage,
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        // Build the list for text buttons with scroll
-                        if ((curpage - 1) == index) {
-                          // Set current page number active
-                          color = Colors.red;
-                        } else {
-                          color = Colors.black;
-                        }
-                        return TextButton(
-                          onPressed: () {
-                            setState(() {
-                              curpage = index + 1; // Set the current page
-                            });
-                            loadNewsData();
-                          },
-                          child: Text(
-                            (index + 1).toString(),
-                            style: TextStyle(color: color, fontSize: 18),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  buildPagination(),
                 ],
               ),
             ),
-      drawer: const MyDrawer(),
+      drawer: MyDrawer(email:widget.email),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await Navigator.push(
@@ -296,6 +266,38 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Widget buildPagination() {
+    return SizedBox(
+      height: screenHeight * 0.05,
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: numofpage,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+          // Build the list for text buttons with scroll
+          if ((curpage - 1) == index) {
+            // Set current page number active
+            color = Colors.red;
+          } else {
+            color = Colors.black;
+          }
+          return TextButton(
+            onPressed: () {
+              setState(() {
+                curpage = index + 1; // Set the current page
+              });
+              loadNewsData();
+            },
+            child: Text(
+              (index + 1).toString(),
+              style: TextStyle(color: color, fontSize: 18),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget buildSearchBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -365,19 +367,6 @@ class _MainScreenState extends State<MainScreen> {
             ),
             actions: [
               TextButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    News news = newsList[index];
-                    // print(news.newsTitle.toString());  //to check whether the news object can be passed
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EditNewsScreen(news: news)),
-                    );
-                    loadNewsData();
-                  },
-                  child: const Text("Edit")),
-              TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
@@ -439,6 +428,88 @@ class _MainScreenState extends State<MainScreen> {
         }
       }
     });
+  }
+
+  void showEditDeleteMenu(int index) {
+    showModalBottomSheet(
+      backgroundColor: Colors.white,
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
+      ),
+      builder: (context) {
+        return Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Edit News'),
+              onTap: () {
+                Navigator.pop(context);
+                editNews(index);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete),
+              title: const Text('Delete News'),
+              onTap: () {
+                Navigator.pop(context);
+                deleteDialog(index);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void editNews(int index) async {
+    News news = newsList[index];
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditNewsScreen(news: news),
+      ),
+    );
+    loadNewsData(); // Refresh the news list after editing
+  }
+
+  // void toggleFavorite(News news) {
+  //   String url =
+  //       "${Myconfig.servername}/memberlink_asg1/api/toggle_favorite_news.php";
+
+  //   http.post(Uri.parse(url), body: {
+  //     "userEmail": widget.email, // Replace with dynamic user email
+  //     "newsId": news.newsId,
+  //   }).then((response) {
+  //     if (response.statusCode == 200) {
+  //       var data = jsonDecode(response.body);
+  //       if (data['status'] == "success") {
+  //         setState(() {
+  //           news.isFavorite = !(news.isFavorite ?? false); // Toggle state
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
+
+  Widget buildPaginationInfo() {
+    return Column(
+      children: [
+        Container(
+          alignment: Alignment.center,
+          margin: const EdgeInsets.only(top: 10.0),
+          child: Text(
+            "Page: $curpage / Result: $numofresult",
+            style: const TextStyle(
+              fontSize: 16,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: screenHeight * 0.02,
+        )
+      ],
+    );
   }
 
   // void searchNews(String query) {
