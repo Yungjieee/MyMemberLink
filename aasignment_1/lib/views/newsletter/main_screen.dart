@@ -19,7 +19,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   List<News> newsList = [];
-  List<News> filteredNewsList = [];
+  List<News> favoriteNewsList = [];
   final df = DateFormat('dd/MM/yyyy hh:mm a');
   int numofpage = 1;
   int curpage = 1;
@@ -27,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
   late double screenwidth, screenHeight;
   var color;
   TextEditingController searchController = TextEditingController();
-  bool isFavorite = false;
+  // bool isFavourite = false;
 
   @override
   void initState() {
@@ -35,6 +35,14 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     loadNewsData();
   }
+
+  // Example: Refresh data when switching pages
+// @override
+// void didChangeDependencies() {
+//   super.didChangeDependencies();
+//   loadNewsData(); // Refresh data when dependencies change
+// }
+
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +95,8 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
             )
-          : Padding(
+          : //buildNewsList(newsList)
+          Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
@@ -155,19 +164,20 @@ class _MainScreenState extends State<MainScreen> {
                                 trailing: IconButton(
                                   onPressed: () {
                                     // showNewsDetailsDialog(index);
-                                    // Toggle favorite status
-                                    //toggleFavorite(newsList[index]);
-                                    setState(() {
-                                      isFavorite =
-                                          !isFavorite; // Toggle favorite state
-                                    });
+                                    // Toggle favourite status
+                                    toggleFavourite(newsList[index]);
+                                    // setState(() {
+                                    //   isFavourite =
+                                    //       !isFavourite; // Toggle favourite state
+                                    // });
                                   },
                                   icon: Icon(
-                                    isFavorite
+                                    newsList[index].isFavourite == true
                                         ? Icons.favorite
                                         : Icons.favorite_border,
-                                    color:
-                                        isFavorite ? Colors.red : Colors.grey,
+                                    color: newsList[index].isFavourite == true
+                                        ? Colors.red
+                                        : Colors.grey,
                                   ),
                                 ),
                               ),
@@ -181,7 +191,7 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
             ),
-      drawer: MyDrawer(email:widget.email),
+      drawer: MyDrawer(email: widget.email),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await Navigator.push(
@@ -221,50 +231,100 @@ class _MainScreenState extends State<MainScreen> {
   //   });
   // }
 
+  // void loadNewsData() {
+  //   String searchQuery = searchController.text.trim();
+  //   String url =
+  //       "${Myconfig.servername}/memberlink_asg1/api/load_news.php?pageno=$curpage";
+
+  //   // Append search query if it's not empty
+  //   if (searchQuery.isNotEmpty) {
+  //     url += "&search=${Uri.encodeComponent(searchQuery)}";
+  //   }
+
+  //   http.get(Uri.parse(url)).then((response) {
+  //     if (response.statusCode == 200) {
+  //       var data = jsonDecode(response.body);
+
+  //       if (data['status'] == "success") {
+  //         var result = data['data']['news'];
+  //         newsList.clear(); // Clear the current list before loading new data
+  //         for (var i in result) {
+  //           News news = News.fromJson(i);
+  //           newsList.add(news);
+  //         }
+
+  //         // Update pagination details
+  //         numofpage = int.parse(data['numofpage'].toString());
+  //         numofresult = int.parse(data['numberofresult'].toString());
+
+  //         setState(() {});
+  //       } else {
+  //         setState(() {
+  //           newsList.clear(); // Clear the list if no results found
+  //         });
+  //         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //           content: Text("No results found"),
+  //           backgroundColor: Colors.red,
+  //         ));
+  //       }
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //         content: Text("Failed to load news"),
+  //         backgroundColor: Colors.red,
+  //       ));
+  //     }
+  //   });
+  // }
+
   void loadNewsData() {
-    String searchQuery = searchController.text.trim();
-    String url =
-        "${Myconfig.servername}/memberlink_asg1/api/load_news.php?pageno=$curpage";
+  String searchQuery = searchController.text.trim();
+  String url =
+      "${Myconfig.servername}/memberlink_asg1/api/load_news.php?pageno=$curpage";
 
-    // Append search query if it's not empty
-    if (searchQuery.isNotEmpty) {
-      url += "&search=${Uri.encodeComponent(searchQuery)}";
-    }
+  // Append search query if it's not empty
+  if (searchQuery.isNotEmpty) {
+    url += "&search=${Uri.encodeComponent(searchQuery)}";
+  }
 
-    http.get(Uri.parse(url)).then((response) {
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
+  http.post(Uri.parse(url), body: {
+    "userEmail": widget.email, // Pass the current user's email
+  }).then((response) {
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
 
-        if (data['status'] == "success") {
-          var result = data['data']['news'];
-          newsList.clear(); // Clear the current list before loading new data
-          for (var i in result) {
-            News news = News.fromJson(i);
-            newsList.add(news);
-          }
-
-          // Update pagination details
-          numofpage = int.parse(data['numofpage'].toString());
-          numofresult = int.parse(data['numberofresult'].toString());
-
-          setState(() {});
-        } else {
-          setState(() {
-            newsList.clear(); // Clear the list if no results found
-          });
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("No results found"),
-            backgroundColor: Colors.red,
-          ));
+      if (data['status'] == "success") {
+        var result = data['data']['news'];
+        newsList.clear();
+        for (var i in result) {
+          News news = News.fromJson(i);
+          // Ensure the favorite status is synced with the database
+          news.isFavourite = i['isFavourite'] == "1"; // Assuming 'isFavourite' is returned as "1" or "0"
+          newsList.add(news);
         }
+
+        // Update pagination details
+        numofpage = int.parse(data['numofpage'].toString());
+        numofresult = int.parse(data['numberofresult'].toString());
+
+        setState(() {});
       } else {
+        setState(() {
+          newsList.clear(); // Clear the list if no results found
+        });
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Failed to load news"),
+          content: Text("No results found"),
           backgroundColor: Colors.red,
         ));
       }
-    });
-  }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Failed to load news"),
+        backgroundColor: Colors.red,
+      ));
+    }
+  });
+}
+
 
   Widget buildPagination() {
     return SizedBox(
@@ -474,23 +534,91 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   // void toggleFavorite(News news) {
-  //   String url =
-  //       "${Myconfig.servername}/memberlink_asg1/api/toggle_favorite_news.php";
+  //   setState(() {
+  //     news.isFavorite = !(news.isFavorite ?? false); // Toggle state
+  //     log("Favorite icon clicked for news: ${news.newsTitle}");
 
-  //   http.post(Uri.parse(url), body: {
-  //     "userEmail": widget.email, // Replace with dynamic user email
-  //     "newsId": news.newsId,
-  //   }).then((response) {
-  //     if (response.statusCode == 200) {
-  //       var data = jsonDecode(response.body);
-  //       if (data['status'] == "success") {
-  //         setState(() {
-  //           news.isFavorite = !(news.isFavorite ?? false); // Toggle state
-  //         });
-  //       }
-  //     }
   //   });
+
+  //   // String email = widget.email;
+
+  //   // String url =
+  //   //     "${Myconfig.servername}/memberlink_asg1/api/toggle_favorite_news.php";
+
+  //   // http.post(Uri.parse(url), body: {
+  //   //   "userEmail":email, // Replace with dynamic user email
+  //   //   "newsId": news.newsId,
+  //   // }).then((response) {
+  //   //   if (response.statusCode == 200) {
+  //   //     var data = jsonDecode(response.body);
+  //   //     if (data['status'] == "success") {
+  //   //       setState(() {
+  //   //         news.isFavorite = !(news.isFavorite ?? false); // Toggle state
+  //   //       });
+  //   //     }
+  //   //   }
+  //   // });
   // }
+
+  void toggleFavourite(News news) {
+  log("Toggling favourite for News ID: ${news.newsId}, User Email: ${widget.email}");
+
+  // Optimistically update the UI
+  setState(() {
+    news.isFavourite = !(news.isFavourite ?? false); // Toggle state
+  });
+
+  String email = widget.email;
+
+
+  String url =
+      "${Myconfig.servername}/memberlink_asg1/api/toggle_favourite_news.php";
+
+  http.post(Uri.parse(url), body: {
+    "userEmail": email, // Pass the user email dynamically
+    "newsId": news.newsId,
+  }).then((response) {
+    //print(response.statusCode);
+    //print(response.body);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      if (data['status'] == "success") {
+        log("Favourite status updated successfully: ${data['message']}");
+      } else {
+        log("Failed to update favourite status: ${data['message']}");
+        // Revert the state on failure
+        setState(() {
+          news.isFavourite = !(news.isFavourite ?? false);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Failed to update favourite status"),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } else {
+      log("Failed to connect to server");
+      // Revert the state on network failure
+      setState(() {
+        news.isFavourite = !(news.isFavourite ?? false);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Failed to connect to server"),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }).catchError((error) {
+    log("Error occurred: $error");
+    // Revert the state on error
+    setState(() {
+      news.isFavourite = !(news.isFavourite ?? false);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text("An error occurred"),
+      backgroundColor: Colors.red,
+    ));
+  });
+}
+
 
   Widget buildPaginationInfo() {
     return Column(
@@ -511,17 +639,4 @@ class _MainScreenState extends State<MainScreen> {
       ],
     );
   }
-
-  // void searchNews(String query) {
-  //   final filteredNews = newsList
-  //       .where((news) =>
-  //           news.newsTitle!.toLowerCase().contains(query.toLowerCase()) ||
-  //           news.newsDetails!.toLowerCase().contains(query.toLowerCase()))
-  //       .toList();
-
-  //   setState(() {
-  //     filteredNewsList = filteredNews; // Update the displayed news list
-  //     print(filteredNewsList);
-  //   });
-  // }
 }
