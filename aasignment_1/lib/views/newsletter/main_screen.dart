@@ -111,7 +111,7 @@ class _MainScreenState extends State<MainScreen> {
             // News List with Pagination
             Expanded(
               child: TabBarView(
-                //physics: const NeverScrollableScrollPhysics(), // Disable swipe
+                physics: const NeverScrollableScrollPhysics(), // Disable swipe
                 children: [
                   // Tab 1: All News
                   RefreshIndicator(
@@ -190,11 +190,57 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget buildNewsList() {
-    return newsList.isEmpty
-        ? const Center(
-            child: Text("No news found."),
-          )
-        : Padding(
+   if (showFavouritesOnly && newsList.isEmpty) {
+    return const Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.inbox_outlined,
+          size: 80,
+          color: Colors.orange
+        ),
+        SizedBox(height: 20),
+        Text(
+          "No favorites news found.",
+          style: TextStyle(
+            fontSize: 16,
+            //fontWeight: FontWeight.bold,
+            color: Colors.orange,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+  );
+  }
+
+  if (!showFavouritesOnly && newsList.isEmpty) {
+    return const Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.inbox_outlined,
+          size: 80,
+          color: Colors.orange
+        ),
+        SizedBox(height: 20),
+        Text(
+          "No news found.",
+          style: TextStyle(
+            fontSize: 16,
+            //fontWeight: FontWeight.bold,
+            color: Colors.orange,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+  );
+  }
+
+  return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
