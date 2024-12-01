@@ -19,7 +19,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   List<News> newsList = [];
-  List<News> favoriteNewsList = [];
+  List<News> favouriteNewsList = [];
   final df = DateFormat('dd/MM/yyyy hh:mm a');
   int numofpage = 1;
   int curpage = 1;
@@ -28,6 +28,9 @@ class _MainScreenState extends State<MainScreen> {
   var color;
   TextEditingController searchController = TextEditingController();
   // bool isFavourite = false;
+  bool showFavouritesOnly = false; // Determines which tab is active
+  bool isDescending = true; // Default to descending order
+
 
   @override
   void initState() {
@@ -43,164 +46,296 @@ class _MainScreenState extends State<MainScreen> {
 //   loadNewsData(); // Refresh data when dependencies change
 // }
 
-
   @override
   Widget build(BuildContext context) {
     screenwidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.orange,
-        centerTitle: true,
-        title: Row(
-          mainAxisSize:
-              MainAxisSize.min, // Centers the row contents in the AppBar
+    return DefaultTabController(
+      length: 2, // Two tabs: All News and Favorites
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.orange,
+          centerTitle: true,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/logo_white.png',
+                height: 50,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Newsletter',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+      icon: Icon(
+        isDescending ? Icons.arrow_downward : Icons.arrow_upward,
+        color: Colors.white,
+      ),
+      tooltip: "Sort by Date",
+      onPressed: () {
+        setState(() {
+          isDescending = !isDescending; // Toggle sorting order
+          loadNewsData(); // Reload data with the new sorting order
+        });
+      },
+    ),
+          ],
+        ),
+        body: Column(
           children: [
-            Image.asset(
-              'assets/images/logo_white.png', // Replace with your logo asset path
-              height: 50,
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  buildSearchBar(),
+                ],
+              ),
             ),
-            const SizedBox(width: 8), // Adds spacing between logo and text
-            const Text(
-              'Newsletter',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20, // Sets text color to white
+
+            // Tab Bar
+            TabBar(
+              onTap: (index) {
+                setState(() {
+                  showFavouritesOnly = index == 1; // Switch tab
+                  curpage = 1; // Reset to the first page
+                  loadNewsData(); // Reload data based on selected tab
+                });
+              },
+              tabs: const [
+                Tab(text: "All News"),
+                Tab(text: "Favourites"),
+              ],
+            ),
+
+            // News List with Pagination
+            Expanded(
+              child: TabBarView(
+                //physics: const NeverScrollableScrollPhysics(), // Disable swipe
+                children: [
+                  // Tab 1: All News
+                  RefreshIndicator(
+                  onRefresh: () async {
+                    loadNewsData(); // Reload data on pull-down
+                  },
+                  child: buildNewsList(),
+                ),
+
+                  // Tab 2: Favorites
+                  RefreshIndicator(
+                  onRefresh: () async {
+                    loadNewsData(); // Reload data on pull-down
+                  },
+                  child: buildNewsList(),
+                ),
+                ],
               ),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              loadNewsData(); // Calls the refresh function
-            },
-            icon: const Icon(Icons.refresh),
-            tooltip: "Refresh", // Optional: Adds a tooltip for the button
+        drawer: MyDrawer(email: widget.email),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const NewNewsScreen()),
+            );
+            loadNewsData();
+          },
+          child: const Icon(Icons.add),
+        ),
+      ),
+    );
+  }
+
+  Widget buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: TextField(
+        controller: searchController,
+        style: const TextStyle(fontSize: 13),
+        onChanged: (value) {
+          curpage = 1; // Reset to page 1 for a new search
+          loadNewsData(); // Load news with the current search query
+        },
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30)),
           ),
+          hintText: "Search news...",
+          hintStyle: const TextStyle(
+            color: Colors.grey,
+            fontSize: 13,
+          ),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: Colors.grey,
+          ),
+          suffixIcon: IconButton(
+            icon: const Icon(
+              Icons.clear_rounded,
+              color: Colors.grey,
+              size: 20,
+            ),
+            onPressed: () {
+              searchController.clear(); // Clear the search bar
+              curpage = 1; // Reset to the first page
+              loadNewsData(); // Reload all news
+            },
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+        ),
+      ),
+    );
+  }
+
+  Widget buildNewsList() {
+    return newsList.isEmpty
+        ? const Center(
+            child: Text("No news found."),
+          )
+        : Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: newsList.length + 1, // +1 for pagination info
+                    itemBuilder: (context, index) {
+                      // Check if it's the last item for pagination info
+                      if (index == newsList.length) {
+                        return buildPaginationInfo();
+                      }
+
+                      // Ensure we don't access out-of-range indexes
+                      if (index < newsList.length) {
+                        return buildNewsCard(index);
+                      }
+
+                      return const SizedBox
+                          .shrink(); // Return an empty widget for safety
+                    },
+                  ),
+                ),
+                buildPagination(),
+              ],
+            ),
+          );
+  }
+
+  Widget buildPaginationInfo() {
+    return Container(
+      alignment: Alignment.center,
+      margin: const EdgeInsets.only(top: 10.0),
+      child: Column(
+        children: [
+          Text(
+            "----- Page: $curpage / $numofpage   |   Total Results: $numofresult -----",
+            style: const TextStyle(fontSize: 14),
+          ),
+          SizedBox(height: screenHeight * 0.01),
         ],
       ),
-      body: newsList.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 10),
-                  buildSearchBar(),
-                  const SizedBox(height: 10),
-                  const Center(
-                    child: Text("Loading..."),
+    );
+  }
+
+  Widget buildPagination() {
+    return SizedBox(
+      height: screenHeight * 0.05,
+      child: ListView.builder(
+        shrinkWrap: true,
+        scrollDirection: Axis.horizontal,
+        itemCount: numofpage,
+        itemBuilder: (context, index) {
+          color = (curpage - 1) == index ? Colors.red : Colors.black;
+          return TextButton(
+            onPressed: () {
+              setState(() {
+                curpage = index + 1; // Update the current page
+              });
+              loadNewsData(); // Load news for the selected page
+            },
+            
+            child: Text(
+              (index + 1).toString(),
+              style: TextStyle(color: color, fontSize: 16),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget buildNewsCard(int index) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        elevation: 5,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListTile(
+            onTap: () {
+              showNewsDetailsDialog(index);
+            },
+            onLongPress: () {
+              showEditDeleteMenu(index);
+            },
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  truncateString(newsList[index].newsTitle.toString(), 50),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
                   ),
-                ],
-              ),
-            )
-          : //buildNewsList(newsList)
-          Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 10),
-                  buildSearchBar(),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: newsList.length +
-                          1, // Include the "Page" text as the last item
-                      itemBuilder: (context, index) {
-                        if (index == newsList.length) {
-                          // Display "Page: X / Result: Y" at the end of the list
-                          return buildPaginationInfo();
-                        }
-                        // Normal news cards
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Card(
-                            elevation: 5,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ListTile(
-                                onTap: () {
-                                  showNewsDetailsDialog(index);
-                                },
-                                onLongPress: () {
-                                  showEditDeleteMenu(index);
-                                },
-                                title: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      truncateString(
-                                        newsList[index].newsTitle.toString(),
-                                        50,
-                                      ),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: screenHeight * 0.01,
-                                    ),
-                                    Text(
-                                      df.format(
-                                        DateTime.parse(
-                                          newsList[index].newsDate.toString(),
-                                        ),
-                                      ),
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    SizedBox(
-                                      height: screenHeight * 0.01,
-                                    ),
-                                  ],
-                                ),
-                                subtitle: Text(
-                                    truncateString(
-                                      newsList[index].newsDetails.toString(),
-                                      165,
-                                    ),
-                                    textAlign: TextAlign.justify,
-                                    style: const TextStyle(fontSize: 12)),
-                                trailing: IconButton(
-                                  onPressed: () {
-                                    // showNewsDetailsDialog(index);
-                                    // Toggle favourite status
-                                    toggleFavourite(newsList[index]);
-                                    // setState(() {
-                                    //   isFavourite =
-                                    //       !isFavourite; // Toggle favourite state
-                                    // });
-                                  },
-                                  icon: Icon(
-                                    newsList[index].isFavourite == true
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: newsList[index].isFavourite == true
-                                        ? Colors.red
-                                        : Colors.grey,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                ),
+                SizedBox(
+                  height: screenHeight * 0.01,
+                ),
+                Text(
+                  df.format(
+                    DateTime.parse(
+                      newsList[index].newsDate.toString(),
                     ),
                   ),
-                  buildPagination(),
-                ],
+                  style: const TextStyle(fontSize: 12),
+                ),
+                SizedBox(
+                  height: screenHeight * 0.01,
+                ),
+              ],
+            ),
+            subtitle: Text(
+              truncateString(
+                newsList[index].newsDetails.toString(),
+                165,
+              ),
+              textAlign: TextAlign.justify,
+              style: const TextStyle(fontSize: 12),
+            ),
+            trailing: IconButton(
+              onPressed: () {
+                toggleFavourite(newsList[index]);
+              },
+              icon: Icon(
+                newsList[index].isFavourite == true
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: newsList[index].isFavourite == true
+                    ? Colors.red
+                    : Colors.grey,
               ),
             ),
-      drawer: MyDrawer(email: widget.email),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const NewNewsScreen()),
-          );
-          loadNewsData();
-        },
-        child: const Icon(Icons.add),
+          ),
+        ),
       ),
     );
   }
@@ -276,40 +411,93 @@ class _MainScreenState extends State<MainScreen> {
   //   });
   // }
 
-  void loadNewsData() {
-  String searchQuery = searchController.text.trim();
-  String url =
-      "${Myconfig.servername}/memberlink_asg1/api/load_news.php?pageno=$curpage";
+//   void loadNewsData() {
+//   String searchQuery = searchController.text.trim();
+//   String url =
+//       "${Myconfig.servername}/memberlink_asg1/api/load_news.php?pageno=$curpage";
 
-  // Append search query if it's not empty
+//   // Append search query if it's not empty
+//   if (searchQuery.isNotEmpty) {
+//     url += "&search=${Uri.encodeComponent(searchQuery)}";
+//   }
+
+//   http.post(Uri.parse(url), body: {
+//     "userEmail": widget.email, // Pass the current user's email
+//   }).then((response) {
+//     if (response.statusCode == 200) {
+//       var data = jsonDecode(response.body);
+
+//       if (data['status'] == "success") {
+//         var result = data['data']['news'];
+//         newsList.clear();
+//         for (var i in result) {
+//           News news = News.fromJson(i);
+//           // Ensure the favourite status is synced with the database
+//           news.isFavourite = i['isFavourite'] == "1"; // Assuming 'isFavourite' is returned as "1" or "0"
+//           newsList.add(news);
+//         }
+
+//         // Update pagination details
+//         numofpage = int.parse(data['numofpage'].toString());
+//         numofresult = int.parse(data['numberofresult'].toString());
+
+//         setState(() {});
+//       } else {
+//         setState(() {
+//           newsList.clear(); // Clear the list if no results found
+//         });
+//         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+//           content: Text("No results found"),
+//           backgroundColor: Colors.red,
+//         ));
+//       }
+//     } else {
+//       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+//         content: Text("Failed to load news"),
+//         backgroundColor: Colors.red,
+//       ));
+//     }
+//   });
+// }
+
+ void loadNewsData() {
+  String url = showFavouritesOnly
+      ? "${Myconfig.servername}/memberlink_asg1/api/load_favourites.php?pageno=$curpage"
+      : "${Myconfig.servername}/memberlink_asg1/api/load_news.php?pageno=$curpage";
+
+  String searchQuery = searchController.text.trim();
   if (searchQuery.isNotEmpty) {
     url += "&search=${Uri.encodeComponent(searchQuery)}";
   }
 
+  url += "&order=${isDescending ? 'DESC' : 'ASC'}"; // Add sorting parameter
+
   http.post(Uri.parse(url), body: {
-    "userEmail": widget.email, // Pass the current user's email
+    "userEmail": widget.email,
   }).then((response) {
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
+      print(response.body);
 
       if (data['status'] == "success") {
         var result = data['data']['news'];
         newsList.clear();
         for (var i in result) {
           News news = News.fromJson(i);
-          // Ensure the favorite status is synced with the database
-          news.isFavourite = i['isFavourite'] == "1"; // Assuming 'isFavourite' is returned as "1" or "0"
+
+          // Map 'isFavourite' from backend to 'isFavourite' in Flutter
+          news.isFavourite =
+              (i['isFavourite']?.toString() == "1") ? true : false;
+
           newsList.add(news);
         }
 
-        // Update pagination details
         numofpage = int.parse(data['numofpage'].toString());
         numofresult = int.parse(data['numberofresult'].toString());
-
-        setState(() {});
+        setState(() {}); // Refresh the UI
       } else {
         setState(() {
-          newsList.clear(); // Clear the list if no results found
+          newsList.clear(); // Clear the list
         });
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("No results found"),
@@ -322,83 +510,15 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.red,
       ));
     }
+  }).catchError((error) {
+    log("Error occurred: $error");
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text("An error occurred while fetching news"),
+      backgroundColor: Colors.red,
+    ));
   });
 }
 
-
-  Widget buildPagination() {
-    return SizedBox(
-      height: screenHeight * 0.05,
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: numofpage,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          // Build the list for text buttons with scroll
-          if ((curpage - 1) == index) {
-            // Set current page number active
-            color = Colors.red;
-          } else {
-            color = Colors.black;
-          }
-          return TextButton(
-            onPressed: () {
-              setState(() {
-                curpage = index + 1; // Set the current page
-              });
-              loadNewsData();
-            },
-            child: Text(
-              (index + 1).toString(),
-              style: TextStyle(color: color, fontSize: 18),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      margin: const EdgeInsets.only(bottom: 10.0),
-      child: TextField(
-        controller: searchController,
-        style: const TextStyle(fontSize: 13),
-        onChanged: (value) {
-          curpage = 1; // Reset to page 1 for a new search
-          loadNewsData(); // Load news with the current search query
-        },
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(30)),
-          ),
-          hintText: "Search news...",
-          hintStyle: const TextStyle(
-            color: Colors.grey,
-            fontSize: 13,
-          ),
-          prefixIcon: const Icon(
-            Icons.search,
-            color: Colors.grey,
-          ),
-          suffixIcon: IconButton(
-            icon: const Icon(
-              Icons.clear_rounded,
-              color: Colors.grey,
-              size: 20,
-            ),
-            onPressed: () {
-              searchController.clear(); // Clear the search bar
-              curpage = 1; // Reset to the first page
-              loadNewsData(); // Reload all news
-            },
-          ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
-        ),
-      ),
-    );
-  }
 
   String truncateString(String str, int length) {
     if (str.length > length) {
@@ -533,17 +653,17 @@ class _MainScreenState extends State<MainScreen> {
     loadNewsData(); // Refresh the news list after editing
   }
 
-  // void toggleFavorite(News news) {
+  // void toggleFavourite(News news) {
   //   setState(() {
-  //     news.isFavorite = !(news.isFavorite ?? false); // Toggle state
-  //     log("Favorite icon clicked for news: ${news.newsTitle}");
+  //     news.isFavourite = !(news.isFavourite ?? false); // Toggle state
+  //     log("Favourite icon clicked for news: ${news.newsTitle}");
 
   //   });
 
   //   // String email = widget.email;
 
   //   // String url =
-  //   //     "${Myconfig.servername}/memberlink_asg1/api/toggle_favorite_news.php";
+  //   //     "${Myconfig.servername}/memberlink_asg1/api/toggle_favourite_news.php";
 
   //   // http.post(Uri.parse(url), body: {
   //   //   "userEmail":email, // Replace with dynamic user email
@@ -553,7 +673,7 @@ class _MainScreenState extends State<MainScreen> {
   //   //     var data = jsonDecode(response.body);
   //   //     if (data['status'] == "success") {
   //   //       setState(() {
-  //   //         news.isFavorite = !(news.isFavorite ?? false); // Toggle state
+  //   //         news.isFavourite = !(news.isFavourite ?? false); // Toggle state
   //   //       });
   //   //     }
   //   //   }
@@ -561,82 +681,60 @@ class _MainScreenState extends State<MainScreen> {
   // }
 
   void toggleFavourite(News news) {
-  log("Toggling favourite for News ID: ${news.newsId}, User Email: ${widget.email}");
+    log("Toggling favourite for News ID: ${news.newsId}, User Email: ${widget.email}");
 
-  // Optimistically update the UI
-  setState(() {
-    news.isFavourite = !(news.isFavourite ?? false); // Toggle state
-  });
+    // Optimistically update the UI
+    setState(() {
+      news.isFavourite = !(news.isFavourite ?? false); // Toggle state
+    });
 
-  String email = widget.email;
+    String email = widget.email;
 
+    String url =
+        "${Myconfig.servername}/memberlink_asg1/api/toggle_favourite_news.php";
 
-  String url =
-      "${Myconfig.servername}/memberlink_asg1/api/toggle_favourite_news.php";
-
-  http.post(Uri.parse(url), body: {
-    "userEmail": email, // Pass the user email dynamically
-    "newsId": news.newsId,
-  }).then((response) {
-    //print(response.statusCode);
-    //print(response.body);
-    if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      if (data['status'] == "success") {
-        log("Favourite status updated successfully: ${data['message']}");
+    http.post(Uri.parse(url), body: {
+      "userEmail": email, // Pass the user email dynamically
+      "newsId": news.newsId,
+    }).then((response) {
+      //print(response.statusCode);
+      //print(response.body);
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        if (data['status'] == "success") {
+          log("Favourite status updated successfully: ${data['message']}");
+        } else {
+          log("Failed to update favourite status: ${data['message']}");
+          // Revert the state on failure
+          setState(() {
+            news.isFavourite = !(news.isFavourite ?? false);
+          });
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Failed to update favourite status"),
+            backgroundColor: Colors.red,
+          ));
+        }
       } else {
-        log("Failed to update favourite status: ${data['message']}");
-        // Revert the state on failure
+        log("Failed to connect to server");
+        // Revert the state on network failure
         setState(() {
           news.isFavourite = !(news.isFavourite ?? false);
         });
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Failed to update favourite status"),
+          content: Text("Failed to connect to server"),
           backgroundColor: Colors.red,
         ));
       }
-    } else {
-      log("Failed to connect to server");
-      // Revert the state on network failure
+    }).catchError((error) {
+      log("Error occurred: $error");
+      // Revert the state on error
       setState(() {
         news.isFavourite = !(news.isFavourite ?? false);
       });
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Failed to connect to server"),
+        content: Text("An error occurred"),
         backgroundColor: Colors.red,
       ));
-    }
-  }).catchError((error) {
-    log("Error occurred: $error");
-    // Revert the state on error
-    setState(() {
-      news.isFavourite = !(news.isFavourite ?? false);
     });
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text("An error occurred"),
-      backgroundColor: Colors.red,
-    ));
-  });
-}
-
-
-  Widget buildPaginationInfo() {
-    return Column(
-      children: [
-        Container(
-          alignment: Alignment.center,
-          margin: const EdgeInsets.only(top: 10.0),
-          child: Text(
-            "Page: $curpage / Result: $numofresult",
-            style: const TextStyle(
-              fontSize: 16,
-            ),
-          ),
-        ),
-        SizedBox(
-          height: screenHeight * 0.02,
-        )
-      ],
-    );
   }
 }

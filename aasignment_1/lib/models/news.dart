@@ -12,7 +12,7 @@ class News {
     newsTitle = json['news_title'];
     newsDetails = json['news_details'];
     newsDate = json['news_date'];
-    isFavourite = json['isFavourite'] == 1; // Map to boolean
+    isFavourite = json['isFavourite'] == 1;// Map to boolean
   }
 
   Map<String, dynamic> toJson() {
