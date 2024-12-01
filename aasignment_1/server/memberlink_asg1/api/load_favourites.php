@@ -1,4 +1,5 @@
 <?php
+
 include_once("dbconnect.php");
 
 $results_per_page = 10;
@@ -81,6 +82,9 @@ if ($result && $result->num_rows > 0) {
         $news['isFavourite'] = 1; // Explicitly set favourite status
         array_push($newsarray['news'], $news);
     }
+} else {
+    // Return an empty "news" array if no favourites are found
+    $newsarray['news'] = array();
 }
 
 // Prepare final response
@@ -100,4 +104,6 @@ function sendJsonResponse($sentArray)
     header('Content-Type: application/json');
     echo json_encode($sentArray);
 }
+
+
 ?>
