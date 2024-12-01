@@ -340,125 +340,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // void loadNewsData() {
-  //   http
-  //       .get(Uri.parse(
-  //           "${Myconfig.servername}/memberlink_asg1/api/load_news.php?pageno=$curpage"))
-  //       .then((response) {
-  //     // log(response.body.toString());
-  //     if (response.statusCode == 200) {
-  //       var data = jsonDecode(response.body);
-  //       if (data['status'] == "success") {
-  //         var result = data['data']['news'];
-  //         newsList.clear();
-  //         for (var i in result) {
-  //           News news = News.fromJson(i);
-  //           newsList.add(news);
-  //           //print(news.newsTitle);
-  //         }
-  //         numofpage = int.parse(data['numofpage'].toString());
-  //         numofresult = int.parse(data['numberofresult'].toString());
-  //         setState(() {});
-  //       }
-  //     } else {
-  //       print("Error");
-  //     }
-  //   });
-  // }
-
-  // void loadNewsData() {
-  //   String searchQuery = searchController.text.trim();
-  //   String url =
-  //       "${Myconfig.servername}/memberlink_asg1/api/load_news.php?pageno=$curpage";
-
-  //   // Append search query if it's not empty
-  //   if (searchQuery.isNotEmpty) {
-  //     url += "&search=${Uri.encodeComponent(searchQuery)}";
-  //   }
-
-  //   http.get(Uri.parse(url)).then((response) {
-  //     if (response.statusCode == 200) {
-  //       var data = jsonDecode(response.body);
-
-  //       if (data['status'] == "success") {
-  //         var result = data['data']['news'];
-  //         newsList.clear(); // Clear the current list before loading new data
-  //         for (var i in result) {
-  //           News news = News.fromJson(i);
-  //           newsList.add(news);
-  //         }
-
-  //         // Update pagination details
-  //         numofpage = int.parse(data['numofpage'].toString());
-  //         numofresult = int.parse(data['numberofresult'].toString());
-
-  //         setState(() {});
-  //       } else {
-  //         setState(() {
-  //           newsList.clear(); // Clear the list if no results found
-  //         });
-  //         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //           content: Text("No results found"),
-  //           backgroundColor: Colors.red,
-  //         ));
-  //       }
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //         content: Text("Failed to load news"),
-  //         backgroundColor: Colors.red,
-  //       ));
-  //     }
-  //   });
-  // }
-
-//   void loadNewsData() {
-//   String searchQuery = searchController.text.trim();
-//   String url =
-//       "${Myconfig.servername}/memberlink_asg1/api/load_news.php?pageno=$curpage";
-
-//   // Append search query if it's not empty
-//   if (searchQuery.isNotEmpty) {
-//     url += "&search=${Uri.encodeComponent(searchQuery)}";
-//   }
-
-//   http.post(Uri.parse(url), body: {
-//     "userEmail": widget.email, // Pass the current user's email
-//   }).then((response) {
-//     if (response.statusCode == 200) {
-//       var data = jsonDecode(response.body);
-
-//       if (data['status'] == "success") {
-//         var result = data['data']['news'];
-//         newsList.clear();
-//         for (var i in result) {
-//           News news = News.fromJson(i);
-//           // Ensure the favourite status is synced with the database
-//           news.isFavourite = i['isFavourite'] == "1"; // Assuming 'isFavourite' is returned as "1" or "0"
-//           newsList.add(news);
-//         }
-
-//         // Update pagination details
-//         numofpage = int.parse(data['numofpage'].toString());
-//         numofresult = int.parse(data['numberofresult'].toString());
-
-//         setState(() {});
-//       } else {
-//         setState(() {
-//           newsList.clear(); // Clear the list if no results found
-//         });
-//         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-//           content: Text("No results found"),
-//           backgroundColor: Colors.red,
-//         ));
-//       }
-//     } else {
-//       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-//         content: Text("Failed to load news"),
-//         backgroundColor: Colors.red,
-//       ));
-//     }
-//   });
-// }
 
  void loadNewsData() {
   String url = showFavouritesOnly
@@ -477,7 +358,7 @@ class _MainScreenState extends State<MainScreen> {
   }).then((response) {
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      print(response.body);
+      // print(response.body);
 
       if (data['status'] == "success") {
         var result = data['data']['news'];
@@ -653,35 +534,9 @@ class _MainScreenState extends State<MainScreen> {
     loadNewsData(); // Refresh the news list after editing
   }
 
-  // void toggleFavourite(News news) {
-  //   setState(() {
-  //     news.isFavourite = !(news.isFavourite ?? false); // Toggle state
-  //     log("Favourite icon clicked for news: ${news.newsTitle}");
-
-  //   });
-
-  //   // String email = widget.email;
-
-  //   // String url =
-  //   //     "${Myconfig.servername}/memberlink_asg1/api/toggle_favourite_news.php";
-
-  //   // http.post(Uri.parse(url), body: {
-  //   //   "userEmail":email, // Replace with dynamic user email
-  //   //   "newsId": news.newsId,
-  //   // }).then((response) {
-  //   //   if (response.statusCode == 200) {
-  //   //     var data = jsonDecode(response.body);
-  //   //     if (data['status'] == "success") {
-  //   //       setState(() {
-  //   //         news.isFavourite = !(news.isFavourite ?? false); // Toggle state
-  //   //       });
-  //   //     }
-  //   //   }
-  //   // });
-  // }
 
   void toggleFavourite(News news) {
-    log("Toggling favourite for News ID: ${news.newsId}, User Email: ${widget.email}");
+    //log("Toggling favourite for News ID: ${news.newsId}, User Email: ${widget.email}");
 
     // Optimistically update the UI
     setState(() {
@@ -702,7 +557,13 @@ class _MainScreenState extends State<MainScreen> {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         if (data['status'] == "success") {
-          log("Favourite status updated successfully: ${data['message']}");
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(news.isFavourite == true
+              ? "Added to favorites successfully!"
+              : "Removed from favorites successfully!"),
+          backgroundColor: Colors.green,
+        ));
+         // log("Favourite status updated successfully: ${data['message']}");
         } else {
           log("Failed to update favourite status: ${data['message']}");
           // Revert the state on failure
