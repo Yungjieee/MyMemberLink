@@ -1,5 +1,20 @@
-MyMemberLink
-MyMemberLink is a Flutter-based app designed for managing newsletters, events, members, and more. This app comes with an intuitive UI, robust functionality, and essential features like user authentication and password management.
+# MyMemberLink
+A Flutter-based app for managing newsletters, events, members, and more.
+
+<h2>Screenshots</h2>
+
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/splash.png" width="200"></td>
+    <td><img src="https://github.com/user-attachments/assets/login.png" width="200"></td>
+    <td><img src="https://github.com/user-attachments/assets/register.png" width="200"></td>
+  </tr>
+  <tr>
+    <td>Splash Screen</td>
+    <td>Login Screen</td>
+    <td>Register Screen</td>
+  </tr>
+</table>
 
 Screenshots
 Authentication Screens
