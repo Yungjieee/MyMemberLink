@@ -94,6 +94,9 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
             ),
             MaterialButton(
                 elevation: 10,
+                 shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                 onPressed: () {
                   onInsertNewsDialog();
                 },
