@@ -39,18 +39,4 @@
   </tr>
 </table>
 
-<h2>How to Install</h2>
-<p>Follow these steps to install the app:</p>
-<ol>
-  <li>Clone the repository: <code>git clone https://github.com/your-repo/MyMemberLink.git</code></li>
-  <li>Navigate to the project directory: <code>cd MyMemberLink</code></li>
-  <li>Install dependencies: <code>flutter pub get</code></li>
-  <li>Run the app: <code>flutter run</code></li>
-</ol>
 
-<h2>Contact</h2>
-<p>For feedback or inquiries, feel free to reach out:</p>
-<ul>
-  <li>Email: <a href="mailto:youremail@example.com">youremail@example.com</a></li>
-  <li>GitHub: <a href="https://github.com/your-profile">Your GitHub Profile</a></li>
-</ul>
