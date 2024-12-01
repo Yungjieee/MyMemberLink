@@ -27,7 +27,6 @@ class _MainScreenState extends State<MainScreen> {
   late double screenwidth, screenHeight;
   var color;
   TextEditingController searchController = TextEditingController();
-  // bool isFavourite = false;
   bool showFavouritesOnly = false; // Determines which tab is active
   bool isDescending = true; // Default to descending order
 
@@ -39,12 +38,6 @@ class _MainScreenState extends State<MainScreen> {
     loadNewsData();
   }
 
-  // Example: Refresh data when switching pages
-// @override
-// void didChangeDependencies() {
-//   super.didChangeDependencies();
-//   loadNewsData(); // Refresh data when dependencies change
-// }
 
   @override
   Widget build(BuildContext context) {
