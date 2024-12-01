@@ -43,12 +43,21 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
                   fontSize: 20), // Sets text color to white
             ),
           ],
-      ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              "Title",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 5),
             TextField(
               controller: titleController,
               decoration: const InputDecoration(
@@ -60,8 +69,16 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
             const SizedBox(
               height: 15,
             ),
+             const Text(
+                "Details",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5),
             SizedBox(
-              height: screenheight * 0.7,
+              height: screenheight * 0.65,
               child: TextField(
                 controller: detailsController,
                 decoration: const InputDecoration(
@@ -84,7 +101,8 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
                 height: 50,
                 color: const Color.fromARGB(255, 236, 16, 0),
                 child: const Text(
-                  "Insert", style: TextStyle(color: Colors.white),
+                  "Insert",
+                  style: TextStyle(color: Colors.white),
                 )),
           ],
         ),

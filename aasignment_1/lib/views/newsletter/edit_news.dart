@@ -57,7 +57,16 @@ class _EditNewsScreenState extends State<EditNewsScreen> {
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // Align text to the left
             children: [
+               const Text(
+                "Title",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5),
               TextField(
                 controller: titleController,
                 decoration: const InputDecoration(
@@ -69,8 +78,16 @@ class _EditNewsScreenState extends State<EditNewsScreen> {
               const SizedBox(
                 height: 15,
               ),
+              const Text(
+                "Details",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5),
               SizedBox(
-                height: screenheight * 0.7,
+                height: screenheight * 0.65,
                 child: TextField(
                   controller: detailsController,
                   decoration: const InputDecoration(
@@ -86,6 +103,9 @@ class _EditNewsScreenState extends State<EditNewsScreen> {
               ),
               MaterialButton(
                   elevation: 10,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                   onPressed: () {
                     onUpdateNewsDialog();
                   },
