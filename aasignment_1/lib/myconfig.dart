@@ -1,5 +1,5 @@
 class Myconfig {
-  static const  servername = "http://192.168.0.161";
+  static const  servername = "http://10.19.84.99";
   
   
 }
