@@ -1,10 +1,9 @@
 import 'dart:convert';
-
 import 'package:aasignment_1/myconfig.dart';
 import 'package:flutter/material.dart';
 import 'package:aasignment_1/models/news.dart';
 import 'package:http/http.dart' as http;
-// import 'package:aasignment_1/myconfig.dart';
+
 
 class EditNewsScreen extends StatefulWidget {
   final News news;

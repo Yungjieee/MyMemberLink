@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:aasignment_1/myconfig.dart';
 import 'package:aasignment_1/views/auth/forgetPassword_screen.dart';
-import 'package:aasignment_1/views/newsletter/main_screen.dart';
+import 'package:aasignment_1/views/newsletter/news_screen.dart';
 import 'package:aasignment_1/views/auth/verifyOTP_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
