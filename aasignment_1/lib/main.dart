@@ -24,6 +24,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: 'My Member Link',
       theme: ThemeData(
+        scaffoldBackgroundColor: const Color.fromARGB(255, 252, 252, 252), 
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.orange, // Default Flutter orange

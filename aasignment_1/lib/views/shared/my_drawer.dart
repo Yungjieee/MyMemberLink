@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:aasignment_1/views/events/event_screen.dart';
+import 'package:aasignment_1/views/product/product_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:aasignment_1/myconfig.dart';
 import 'package:aasignment_1/views/auth/login_screen.dart';
@@ -19,17 +20,27 @@ class MyDrawer extends StatefulWidget {
 class _MyDrawerState extends State<MyDrawer> {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   String? userName;
+  String? userId;
 
   @override
   void initState() {
-    super.initState();
-    // Fetch the user's name when the drawer is created
-    fetchUserName(widget.email).then((name) {
+  super.initState();
+  // Fetch the user's details when the screen is initialized
+  fetchUserDetails(widget.email).then((details) {
+    if (details != null) {
       setState(() {
-        userName = name; // Update the userName state
+        userName = details['user_name']; // Update the userName state
+        userId = details['user_id'];     // Update the userId state
       });
-    });
-  }
+    } else {
+      setState(() {
+        userName = "Unknown User"; // Fallback if details are null
+        userId = "0";             // Fallback for userId
+      });
+    }
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -196,9 +207,34 @@ class _MyDrawerState extends State<MyDrawer> {
                   leading: Icon(Icons.payment, color: Colors.orange),
                   title: Text("Payments"),
                 ),
-                const ListTile(
-                  leading: Icon(Icons.shopping_cart, color: Colors.orange),
-                  title: Text("Products"),
+                ListTile(
+                  leading: const Icon(Icons.shopping_cart, color: Colors.orange),
+                  title: const Text("Products"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            ProductScreen(email: widget.email, userId: userId ?? "0"),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          const begin =
+                              Offset(1.0, 0.0); // Slide in from the right
+                          const end = Offset.zero;
+                          const curve = Curves.ease;
+
+                          var tween = Tween(begin: begin, end: end)
+                              .chain(CurveTween(curve: curve));
+                          var offsetAnimation = animation.drive(tween);
+
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: child,
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
                 const ListTile(
                   leading: Icon(Icons.check_circle, color: Colors.orange),
@@ -236,40 +272,41 @@ class _MyDrawerState extends State<MyDrawer> {
     );
   }
 
-  Future<String?> fetchUserName(String email) async {
-    try {
-      // Define the URL of the PHP file
-      String url =
-          "${Myconfig.servername}/memberlink_asg1/api/get_user_name.php";
+ Future<Map<String, dynamic>?> fetchUserDetails(String email) async {
+  try {
+    // Define the URL of the PHP file
+    String url = "${Myconfig.servername}/memberlink_asg1/api/get_user_details.php";
 
-      // Send a POST request with the user email
-      final response = await http.post(
-        Uri.parse(url),
-        body: {
-          "userEmail": widget.email, // Send the email to the backend
-        },
-      );
-
-      if (response.statusCode == 200) {
-        //print(response.body);
-        // Parse the response
-        final data = jsonDecode(response.body);
-        if (data['status'] == 'success') {
-          // Return the user name if the query is successful
-          return data['user_name'];
-        } else {
-          //log("Error: ${data['message']}");
-          return null; // Return null if the user is not found
-        }
+    // Send a POST request with the user email
+    final response = await http.post(
+      Uri.parse(url),
+      body: {
+        "userEmail": email, // Send the email to the backend
+      },
+    );
+log(response.body);
+    if (response.statusCode == 200) {
+      // Parse the response
+      final data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        // Return the user ID and user name as a map
+        return {
+          'user_id': data['user_id'],
+          'user_name': data['user_name'],
+        };
       } else {
-        log("Error: Failed to connect to the server");
-        return null;
+        log("Error: ${data['message']}");
+        return null; // Return null if the user is not found
       }
-    } catch (error) {
-      log("Error: $error");
+    } else {
+      log("Error: Failed to connect to the server");
       return null;
     }
+  } catch (error) {
+    log("Error: $error");
+    return null;
   }
+}
 
   Future signOutwithGoogle(BuildContext context) async {
     await googleSignIn.signOut();
