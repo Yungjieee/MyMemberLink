@@ -163,7 +163,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     ],
                   ),
                   const Divider(thickness: 1),
-
                   // Description
                   const SizedBox(height: 8),
                   const Text(
@@ -507,5 +506,4 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       },
     );
   }
-
 }
