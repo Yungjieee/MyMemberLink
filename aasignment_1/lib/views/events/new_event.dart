@@ -1,12 +1,17 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math';
 import 'package:aasignment_1/myconfig.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class NewEventScreen extends StatefulWidget {
   const NewEventScreen({super.key});
@@ -194,8 +199,14 @@ class _NewEventScreenState extends State<NewEventScreen> {
                         validator: (value) =>
                             value!.isEmpty ? "Enter Location" : null,
                         controller: locationController,
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(
+                        decoration: InputDecoration(
+                            suffixIcon: IconButton(
+                                onPressed: () {
+                                  //determinePosition();
+                                  getPositionDialog();
+                                },
+                                icon: const Icon(Icons.location_on)),
+                            border: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10)),
                             ),
@@ -276,8 +287,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                       },
                       minWidth: screenWidth,
                       height: 50,
-                      color: const Color.fromARGB(
-                          255, 255, 16, 0), 
+                      color: const Color.fromARGB(255, 255, 16, 0),
                       child: Text(
                         "Insert",
                         style: TextStyle(
@@ -402,7 +412,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
     double sizeInKB = (sizeInBytes / (1024 * 1024)) * 1000;
     return sizeInKB;
   }
-  
+
   void insertEventDialog() {
     showDialog(
         context: context,
@@ -436,7 +446,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
           );
         });
   }
-  
+
   void insertEvent() {
     String title = titleController.text;
     String location = locationController.text;
@@ -446,7 +456,8 @@ class _NewEventScreenState extends State<NewEventScreen> {
     String image = base64Encode(_image!.readAsBytesSync());
     //  log(image);
     http.post(
-        Uri.parse("${Myconfig.servername}/memberlink_asg1/api/insert_event.php"),
+        Uri.parse(
+            "${Myconfig.servername}/memberlink_asg1/api/insert_event.php"),
         body: {
           "title": title,
           "location": location,
@@ -473,6 +484,212 @@ class _NewEventScreenState extends State<NewEventScreen> {
         }
       }
     });
+  }
 
+  Future<void> determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      await Geolocator.openLocationSettings();
+      return Future.error('Location services are disabled.');
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+    Position position = await Geolocator.getCurrentPosition();
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(position.latitude, position.longitude);
+    if (placemarks.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Location not found"),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+    String address =
+        "${placemarks[0].name}, ${placemarks[0].locality}, ${placemarks[0].administrativeArea}";
+    print(address);
+    locationController.text = address;
+    setState(() {
+      print(position);
+      //_currentPosition = position;
+    });
+  }
+
+  void getPositionDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: const Text(
+            "Get Location From:",
+            style: TextStyle(),
+          ),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    determinePosition();
+                  },
+                  icon: const Icon(
+                    Icons.location_on,
+                    size: 60,
+                  )),
+              IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _selectfromMap();
+                  },
+                  icon: const Icon(
+                    Icons.map,
+                    size: 60,
+                  )),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _selectfromMap() async {
+    Set<Marker> markers = {};
+    bool serviceEnabled;
+    LocationPermission permission;
+    String address = "";
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    Position position = await Geolocator.getCurrentPosition();
+    if (position == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Location not found"),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
+    LatLng pickupLatLng = LatLng(position.latitude, position.longitude);
+
+    MarkerId markerId1 = const MarkerId("1");
+    markers.clear();
+    markers.add(Marker(
+      markerId: markerId1,
+      position: pickupLatLng,
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      infoWindow: const InfoWindow(title: "Your Current Location"),
+    ));
+
+    final Completer<GoogleMapController> mapcontroller =
+        Completer<GoogleMapController>();
+
+    CameraPosition defaultLocation = CameraPosition(
+      target: LatLng(
+        position.latitude,
+        position.longitude,
+      ),
+      zoom: 14.4746,
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+              title: const Text("Select Location"),
+              content: SizedBox(
+                width: screenWidth,
+                height: 600,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: GoogleMap(
+                        mapType: MapType.normal,
+                        initialCameraPosition: defaultLocation,
+                        onMapCreated: (controller) =>
+                            mapcontroller.complete(controller),
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                        compassEnabled: true,
+                        markers: markers.toSet(),
+                        onLongPress: (argument) => {
+                          markers.clear(),
+                          setState(() {})
+                        },
+                        onTap: (latlng) => setState(() async {
+                          print(latlng.latitude);
+                          print(latlng.longitude);
+                          await getAddress(latlng).then((value) => {
+                            address = value,
+                            locationController.text = address,
+                            });
+                          setState(() {});
+                          markers
+                              .clear(); //only one marker, need to clear then only put the another marker
+                          // int markerIdVal = generateIds();                          //want to put many markers
+                          // MarkerId markerId = MarkerId(markerIdVal.toString());     //want to put many markers
+                          markers.add(Marker(
+                            markerId: markerId1, //only one marker
+                            // markerId: markerId,          //want to put many markers
+                            position: latlng,
+                            icon: BitmapDescriptor.defaultMarkerWithHue(
+                                BitmapDescriptor.hueRed),
+                            infoWindow: const InfoWindow(
+                                title: "Your Selected Location"),
+                          ));
+                        }),
+                      ),
+                    ),
+                    Text(address),
+                  ],
+                ),
+              ));
+        });
+      },
+    );
+  }
+
+  int generateIds() {
+    //want to put many markers, generate random number for markers
+    var rng = Random();
+    int randomInt;
+    randomInt = rng.nextInt(100);
+    return randomInt;
+  }
+
+  Future<String> getAddress(LatLng latlng) async {
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(latlng.latitude, latlng.longitude);
+    if (placemarks.isEmpty) {
+      return "Location not found";
+    } else {
+      return "${placemarks[0].name}, ${placemarks[0].locality}, ${placemarks[0].administrativeArea}";
+    }
   }
 }

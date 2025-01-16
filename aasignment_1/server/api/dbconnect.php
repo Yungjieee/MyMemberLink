@@ -1,8 +1,8 @@
 <?php
 $servername = "localhost";
-$username   = "root";
-$password   = "";
-$dbname     = "mymemberlink_db";
+$username   = "threenqs_mymemberlinkadmin";
+$password   = "Threelittlecar456";
+$dbname     = "threenqs_mymemberlinkdb";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {

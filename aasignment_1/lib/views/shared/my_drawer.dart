@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:aasignment_1/views/events/event_screen.dart';
+import 'package:aasignment_1/views/membership/membership_screen.dart';
+import 'package:aasignment_1/views/payment/paymenthistory_screen.dart';
 import 'package:aasignment_1/views/product/product_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:aasignment_1/myconfig.dart';
@@ -199,13 +201,77 @@ class _MyDrawerState extends State<MyDrawer> {
                     //             EventScreen(email: widget.email)));
                   },
                 ),
-                const ListTile(
-                  leading: Icon(Icons.group, color: Colors.orange),
-                  title: Text("Members"),
+                ListTile(
+                  leading: const Icon(Icons.group, color: Colors.orange),
+                  title: const Text("Membership"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            MembershipScreen(email: widget.email),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          const begin =
+                              Offset(1.0, 0.0); // Slide in from the right
+                          const end = Offset.zero;
+                          const curve = Curves.ease;
+
+                          var tween = Tween(begin: begin, end: end)
+                              .chain(CurveTween(curve: curve));
+                          var offsetAnimation = animation.drive(tween);
+
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: child,
+                          );
+                        },
+                      ),
+                    );
+
+
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (content) =>
+                    //             EventScreen(email: widget.email)));
+                  },
                 ),
-                const ListTile(
-                  leading: Icon(Icons.payment, color: Colors.orange),
-                  title: Text("Payments"),
+                ListTile(
+                  leading: const Icon(Icons.payment, color: Colors.orange),
+                  title: const Text("Payment History"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            PaymenthistoryScreen(email: widget.email),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          const begin =
+                              Offset(1.0, 0.0); // Slide in from the right
+                          const end = Offset.zero;
+                          const curve = Curves.ease;
+
+                          var tween = Tween(begin: begin, end: end)
+                              .chain(CurveTween(curve: curve));
+                          var offsetAnimation = animation.drive(tween);
+
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: child,
+                          );
+                        },
+                      ),
+                    );
+
+
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (content) =>
+                    //             EventScreen(email: widget.email)));
+                  },
                 ),
                 ListTile(
                   leading: const Icon(Icons.shopping_cart, color: Colors.orange),
@@ -284,7 +350,7 @@ class _MyDrawerState extends State<MyDrawer> {
         "userEmail": email, // Send the email to the backend
       },
     );
-log(response.body);
+//log(response.body);
     if (response.statusCode == 200) {
       // Parse the response
       final data = jsonDecode(response.body);

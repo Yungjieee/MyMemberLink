@@ -368,8 +368,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
       maxHeight: 800,
       maxWidth: 800,
     );
-    print("BEFORE CROP: ");
-    print(getFileSize(_image!));
+    // print("BEFORE CROP: ");
+    // print(getFileSize(_image!));
     if (pickedFile != null) {
       _image = File(pickedFile.path);
       // setState(() {

@@ -1,5 +1,3 @@
 class Myconfig {
-  static const  servername = "http://172.20.10.2";
-  
-  
+  static const  servername = "https://mymemberlink.threelittlecar.com";
 }
