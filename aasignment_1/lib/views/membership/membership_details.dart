@@ -60,13 +60,13 @@ class _MembershipDetailsState extends State<MembershipDetails> {
 
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          IconButton(
-              onPressed: () {
-                //loadMembershipData();
-              },
-              icon: const Icon(Icons.refresh))
-        ],
+        // actions: [
+        //   IconButton(
+        //       onPressed: () {
+        //         //loadMembershipData();
+        //       },
+        //       icon: const Icon(Icons.refresh))
+        // ],
         backgroundColor: Colors.orange,
         centerTitle: true,
         title: Row(

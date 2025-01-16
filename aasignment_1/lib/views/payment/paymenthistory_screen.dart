@@ -65,10 +65,11 @@ class _PaymenthistoryScreentState extends State<PaymenthistoryScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-    // Call the loadPaymentsData method with the current status
-    await Future.delayed(const Duration(milliseconds: 500)); // Optional delay for smooth UI
-    loadPaymentsData(selectedStatus);
-  },
+          // Call the loadPaymentsData method with the current status
+          await Future.delayed(const Duration(
+              milliseconds: 500)); // Optional delay for smooth UI
+          loadPaymentsData(selectedStatus);
+        },
         child: Center(
           child: Column(
             children: [
@@ -154,7 +155,7 @@ class _PaymenthistoryScreentState extends State<PaymenthistoryScreen> {
                   ),
                 ),
               ),
-        
+
               // Toggle Button for Status
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -231,10 +232,10 @@ class _PaymenthistoryScreentState extends State<PaymenthistoryScreen> {
                               formatter.format(paymentDate);
                           final selectedPayment =
                               paymentsList[paymentsList.length - 1 - index];
-        
+
                           final bool isPaid =
                               payment.paymentStatus?.toLowerCase() == "paid";
-        
+
                           return Card(
                             color: Colors.white,
                             margin: const EdgeInsets.symmetric(
@@ -252,7 +253,9 @@ class _PaymenthistoryScreentState extends State<PaymenthistoryScreen> {
                                       isPaid ? Colors.green : Colors.red,
                                   radius: 17,
                                   child: Icon(
-                                    isPaid ? Icons.check : Icons.hourglass_empty,
+                                    isPaid
+                                        ? Icons.check
+                                        : Icons.hourglass_empty,
                                     color: Colors.white,
                                   ),
                                 ),
@@ -283,7 +286,8 @@ class _PaymenthistoryScreentState extends State<PaymenthistoryScreen> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: isPaid ? Colors.green : Colors.red,
+                                        color:
+                                            isPaid ? Colors.green : Colors.red,
                                       ),
                                     ),
                                   ),
@@ -319,8 +323,9 @@ class _PaymenthistoryScreentState extends State<PaymenthistoryScreen> {
                                   MaterialPageRoute(
                                     builder: (context) => ViewReceiptScreen(
                                       email: widget.email, // User's email
-                                      receiptId: selectedPayment.paymentReceipt ??
-                                          "", // Receipt ID
+                                      receiptId:
+                                          selectedPayment.paymentReceipt ??
+                                              "", // Receipt ID
                                       membershipId:
                                           selectedPayment.membershipId ??
                                               "", // Membership ID
